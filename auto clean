@@ -1,0 +1,85 @@
+import RPi.GPIO as GPIO
+import time
+from time import sleep
+from gpiozero import Servo
+import math
+from gpiozero.pins.pigpio import PiGPIOFactory
+from multiprocessing import Process
+
+GPIO.setwarnings(False)
+
+factory= PiGPIOFactory()
+
+servo1 = Servo(17, pin_factory=factory)
+servo2 = Servo(12, pin_factory=factory)
+servo3 = Servo(24, pin_factory=factory)
+servo4 = Servo(25, pin_factory=factory)
+servo5 = Servo(8, pin_factory=factory)
+
+
+
+def clean():
+    global distance
+
+    while True:
+        
+
+        GPIO.setmode(GPIO.BCM)
+
+        TRIG = 23
+        ECHO = 18
+        GPIO.setup(TRIG,GPIO.OUT)
+        GPIO.setup(ECHO,GPIO.IN)
+
+
+        GPIO.output(TRIG, False)
+        time.sleep(1)
+
+        GPIO.output(TRIG, True)
+        time.sleep(0.00001)
+        GPIO.output(TRIG, False)
+
+        while GPIO.input(ECHO)==0:
+            pulse_start = time.time()
+
+        while GPIO.input(ECHO)==1:
+            pulse_end = time.time()
+
+        pulse_duration = pulse_end - pulse_start
+        global distance
+
+        distance = pulse_duration * 17150
+
+        distance = round(distance, 2)
+
+
+        print("Distance:",distance,"cm")
+        GPIO.cleanup()
+
+def movement():
+    b = 450
+    c = 100
+    d = 200
+    e = 150
+    f = 150
+    servo2.value= math.sin(math.radians(c))
+    servo3.value= math.sin(math.radians(d))
+    servo4.value= math.sin(math.radians(e))
+    servo5.value= math.sin(math.radians(f))
+    start = True
+    if distance < 10:
+        start = False
+    while start:
+        b += 0.01
+        servo1.value= math.sin(math.radians(b))
+        
+    
+movement()
+
+"""
+if __name__=='__main__':
+    p1 = Process(target=clean)
+    p1.start()
+    p2 = Process(target=movement)
+    p2.start()
+"""

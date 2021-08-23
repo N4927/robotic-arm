@@ -1,0 +1,266 @@
+#sudo pigpiod
+import RPi.GPIO as GPIO
+from gpiozero import Servo
+import time
+from time import sleep
+import math
+from gpiozero.pins.pigpio import PiGPIOFactory
+
+import pygame
+pygame.init()
+
+factory= PiGPIOFactory()
+
+
+servo1 = Servo(17, pin_factory=factory)
+servo2 = Servo(12, pin_factory=factory)
+servo3 = Servo(24, pin_factory=factory)
+servo4 = Servo(25, pin_factory=factory)
+servo5 = Servo(8, pin_factory=factory)
+speed = 2
+def tastiera():
+
+    b = 440
+    c = 100
+    d = 200
+    e = 150
+    f = 150
+
+    servo1.value= math.sin(math.radians(b))
+    servo2.value= math.sin(math.radians(c))
+    servo3.value= math.sin(math.radians(d))
+    servo4.value= math.sin(math.radians(e))
+    servo5.value= math.sin(math.radians(f))
+    #variabile per la scelta del motore
+    stato = 1
+    win = pygame.display.set_mode((500,500))
+
+    keep = True
+    run = True
+
+    speed = 1
+
+    run = True
+    while run:
+        pygame.time.delay(10)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    stato = 1
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_2:
+                    stato = 2
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_3:
+                    stato = 3
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_4:
+                    stato = 4
+
+
+
+        keys = pygame.key.get_pressed()
+
+        if stato == 1:
+            if keys[pygame.K_LEFT]:
+               b += speed
+               if b > 440 :
+                   b = 440
+
+            if keys[pygame.K_RIGHT]:
+               b -= speed
+               if b < 290:
+                  b = 290
+
+        if stato == 2:
+            if keys[pygame.K_LEFT]:
+               c += speed
+               if c > 180:
+                  c = 180
+
+            if keys[pygame.K_RIGHT]:
+               c -= speed
+               if c < 85:
+                  c = 85
+
+        if stato == 3:
+            if keys[pygame.K_LEFT]:
+               d += speed
+               if d > 360:
+                  d = 360
+
+            if keys[pygame.K_RIGHT]:
+               d -= speed
+               if d < 0:
+                    d = 0
+
+        if stato == 4:
+            if keys[pygame.K_LEFT]:
+               f -= speed
+               e += speed
+               if e > 185:
+                  e = 185
+               if f < 115:
+                  f =115
+
+            if keys[pygame.K_RIGHT]:
+               f += speed
+               e -=speed
+               if e < 105:
+                  e = 105
+               if f > 185:
+                  f = 185
+
+
+        if stato == 1:
+            print(b)
+
+        if stato == 2:
+            print(c)
+        if stato == 3:
+            print(d)
+        if stato == 4:
+            print(e)
+            print("-------")
+            print(f)
+        win.fill((0,0,0))
+        pygame.display.update()
+
+        servo1.value= math.sin(math.radians(b))
+        servo2.value= math.sin(math.radians(c))
+        servo3.value= math.sin(math.radians(d))
+        servo4.value= math.sin(math.radians(e))
+        servo5.value= math.sin(math.radians(f))
+
+    pygame.quit()
+
+def clean():
+    #settare metodo conteggio pin
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+
+#settare il numero dei pin del sensore di distanza
+    TRIG = 23
+    ECHO = 18
+
+
+    # inizzializare i pin del settore di distanza
+    GPIO.setup(TRIG,GPIO.OUT)
+    GPIO.setup(ECHO,GPIO.IN)
+
+#inizializzare il pin Trig
+    GPIO.output(TRIG, False)
+    time.sleep(0.1)
+
+    GPIO.output(TRIG, True)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, False)
+
+#segnare il momento in cui parte il suono
+    while GPIO.input(ECHO)==0:
+        pulse_start = time.time()
+
+
+
+# segnare il momento di arrivo dell onda
+    while GPIO.input(ECHO)==1:
+        pulse_end = time.time()
+
+# calcolare il tempo di viaggio del suono
+    pulse_duration = pulse_end - pulse_start
+
+#calcolare la distanza percorsa
+    distance = pulse_duration * 17150
+
+#arrotondo a due decimali
+    distance = round(distance, 2)
+
+
+    #print("Distance:",distance,"cm")
+    return distance
+    GPIO.cleanup()
+
+
+
+def movement():
+#posizioni dei motori
+    b = 440
+    c = 100
+    d = 200
+    e = 150
+    f = 150
+    keep = True
+
+#comunicare la gradazione a cui devono ruotare i motori
+    servo2.value= math.sin(math.radians(c))
+    servo3.value= math.sin(math.radians(d))
+    servo4.value= math.sin(math.radians(e))
+    servo5.value= math.sin(math.radians(f))
+
+
+
+    while keep:
+        #chiamare la distanza dalla funzione precedente
+        distance = clean()
+        #se la distanza è maggiore di 10 il motore ruoto
+        if distance >= 20:
+            b += 2.2
+    
+
+            servo1.value= math.sin(math.radians(b))
+
+        #se no si ferma la rotazione
+        if distance < 20:
+            b = b
+            servo1.value= math.sin(math.radians(b))
+
+
+            keep = False
+
+    if distance <20 and distance >= 15:
+
+        c = 166
+        d = 191
+        e = 105
+        f = 185
+    elif distance <15 and distance >= 12:
+        c = 161
+        d = 188
+        e = 105
+        f = 185
+    elif distance <12 and distance >= 8:
+        c = 151
+        d = 179
+        e = 105
+        f = 185
+    elif distance <8 and distance >= 4:
+        c = 145
+        d = 167
+        e = 105
+        f = 185
+
+    servo2.value= math.sin(math.radians(c))
+    time.sleep(0.5)
+    servo3.value= math.sin(math.radians(d))
+    time.sleep(0.75)
+    servo4.value= math.sin(math.radians(e))
+    servo5.value= math.sin(math.radians(f))
+    time.sleep(1)
+    b = 420
+    c = 100
+    d = 200
+
+
+
+#omunicare la gradazione a cui devono ruotare i motori
+    servo2.value= math.sin(math.radians(c))
+    servo3.value= math.sin(math.radians(d))
+    time.sleep(1.5)
+    servo1.value= math.sin(math.radians(450))
+    time.sleep(3.5)
+
+movement()
+#tastiera()

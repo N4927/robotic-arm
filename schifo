@@ -1,5 +1,10 @@
 import cv2
 import numpy as np
+a = 100
+b = 100
+
+xPrev = 200
+yPrev = 150
 
 cap = cv2.VideoCapture(0)
 while True:
@@ -17,12 +22,31 @@ while True:
     avg = np.mean(point, axis=0)
     Avg2D = np.array(avg)
     Avg1D = Avg2D[0]
+    Avg1D_string = str(Avg1D)
+    newstring = ''.join([i for i in Avg1D_string if i.isdigit()])
 
-    print(len(Avg1D))
+    xString = newstring[:len(newstring) // 2]
+    yString = newstring[len(newstring) // 2:]
+
+    x = int(xString[:3])
+    y = int(yString[:3])
+
+    if x > xPrev:
+        a += 1
+        xPrev = x
+    elif x < xPrev:
+        a -= 1
+        xPrev = x
+    if y > yPrev:
+        b += 1
+        yPrev = y
+    elif y < yPrev:
+        b -= 1
+        yPrev = y
 
 
 
-
+    print(a,b)
 
     key = cv2.waitKey(1)
     if key == "q":

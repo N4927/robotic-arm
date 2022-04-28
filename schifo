@@ -1,0 +1,28 @@
+import cv2
+import numpy as np
+
+cap = cv2.VideoCapture(0)
+while True:
+    _, frame = cap.read()
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    low_green = np.array([45, 100, 115])
+    high_green = np.array([102, 255, 255])
+    green_mask = cv2.inRange(hsv_frame, low_green, high_green)
+    mask = cv2.bitwise_and(frame, frame, mask=green_mask)
+    cv2.imshow("Frame", frame)
+    cv2.imshow("Red", mask)
+
+    point = cv2.findNonZero(green_mask)
+    avg = np.mean(point, axis=0)
+    Avg2D = np.array(avg)
+
+    print(len(Avg2D))
+
+
+
+
+
+    key = cv2.waitKey(1)
+    if key == "q":
+        break

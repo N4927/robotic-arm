@@ -1,0 +1,6 @@
+gpiozero
+pigpio
+pygame
+RPi.GPIO
+numpy
+opencv-python
